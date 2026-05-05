@@ -1,0 +1,66 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# Isaac Sim / Omniverse
+*.usd.bak
+*.usda.bak
+*.usd.tmp
+*.log
+cache/
+cached/
+captures/
+export/
+imports/
+
+# Project outputs (keep the folders, ignore their contents)
+logs/*
+screenshots/*
+recordings/*
+!logs/.gitkeep
+!screenshots/.gitkeep
+!recordings/.gitkeep
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.mp4
+
+# OS junk
+Thumbs.db
+.DS_Store
+
+# Build / packaging
+dist/
+build/
+*.egg-info/
+
+# Local settings
+.env
+.env.*.claude/
+.hypothesis/
+# Local / private (not published to GitHub)
+/README.md
+/CLAUDE.md
+/RobotArm_context.md
+/docs/*
+!/docs/guide/
+/src/
+/tests/
+/.mcp.json
+/pyproject.toml
+/scripts/run_mcp_server.py
+/scripts/check_isaac_connection.py
+/isaac/robotArm.usd
