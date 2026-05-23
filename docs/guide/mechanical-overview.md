@@ -38,3 +38,25 @@ World frame: Y up. Key points measured from the Fusion model:
 | Tool flange face | X 837 |
 
 Link lengths: J2→J3 = 300 mm, J3→J5 = 230 mm. Tool axis sits 5.5 mm below the J4 axis — a known offset; fix in software or raise the wrist pitch block before printing.
+
+## Actuation
+
+| Joints | Motor | Drive |
+| --- | --- | --- |
+| J1 | Hoverboard BLDC | 40T/80T HTD-5M, 2:1 |
+| J2 | Hoverboard BLDC | 40T/120T HTD-5M, 3:1 |
+| J3 | 45–60 kg·cm servo | 15T/60T HTD-5M, 4:1 |
+| J4 | 30 kg·cm servo | 16T/32T HTD-3M, 2:1 |
+| J5 | 45 kg·cm servo | Direct drive |
+| J6 | 20 kg·cm servo | Direct drive, flange on bearing |
+
+## Frozen interfaces
+
+These bolt patterns and faces are fixed — later modules were designed against them:
+
+- **J1 top plate:** Ø155, 8× M5 on Ø120 BC, 2× Ø5 dowels
+- **J2 arm root:** 84×40 boss at X 310, 6× M5 + 2 dowels
+- **J3 forearm mount:** face X 597.2, 4× M4 + 2× Ø4 dowels
+- **J4 wrist mount:** face X 760, Ø46, 4× M4 + 2 dowels, Ø14 cable pass
+- **Tool flange:** X 837, 4× M4 on Ø31.5 BC, Ø4 dowel, Ø10 center
+

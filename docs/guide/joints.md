@@ -1,0 +1,64 @@
+# Joints
+
+Per-joint breakdown for the 6-DOF arm. 
+
+**Quick reference**
+
+
+| Joint | DOF            | Plain English    | Actuator                 | Reduction            |
+| ----- | -------------- | ---------------- | ------------------------ | -------------------- |
+| J1    | Base yaw       | Turntable spin   | Hoverboard BLDC          | 40T/80T HTD-5M, 2:1  |
+| J2    | Shoulder pitch | Arm lifts/lowers | Hoverboard BLDC          | 40T/120T HTD-5M, 3:1 |
+| J3    | Elbow pitch    | Forearm folds    | 45–60 kg·cm serial servo | 15T/60T HTD-5M, 4:1  |
+| J4    | Forearm roll   | Twist along arm  | 30 kg·cm serial servo    | 16T/32T HTD-3M, 2:1  |
+| J5    | Wrist pitch    | Tilt the wrist   | 45 kg·cm serial servo    | Direct (1:1)         |
+| J6    | Tool roll      | Spin the tool    | 20 kg·cm serial servo    | Direct (1:1)         |
+
+
+**Terms used below**
+
+
+| Term             | Meaning                                                              |
+| ---------------- | -------------------------------------------------------------------- |
+| Ø                | Diameter (mm). Ø35×Ø25 tube = 35 mm OD, 25 mm ID.                    |
+| DOF              | Degree of freedom - one independent axis of motion.                  |
+| BLDC             | Brushless DC motor (the hoverboard hub motors).                      |
+| HTD-5M / HTD-3M  | Timing belt profile; number is tooth pitch in mm.                    |
+| 40T/80T          | Pulley tooth counts; ratio sets gear reduction.                      |
+| Dead axle        | Shaft fixed to the frame; the link rotates on bearings around it.    |
+| Serial-bus servo | Position-controlled servo with digital feedback (Feetech STS class). |
+
+
+---
+
+
+
+## J1 — Base rotation (yaw)
+
+**What it does:** Spins the entire arm left and right, like a lazy Susan. This is the only joint with a vertical axis at the base.
+
+**How it works:** A steel tube (Ø35×Ø25, ~160 mm) is the rotating shaft. Two 6307 bearings (35/80/21) carry the load in the printed base tower. A hoverboard hub motor under the belt plane drives a 40T→80T HTD-5M belt for 2:1 reduction which leads to high torque at low speed, which is what you want for a heavy base.
+
+The motor clamps onto the axle with a split PETG-CF boss (no permanent modification to the purchased motor). Torque transmits through a D-profile bore that mates the axle's single machined flat; clamp friction on the round sections handles axial retention. Cables exit the motor groove and route up through the hollow shaft with a service loop for ±270° travel.
+
+**Travel:** ±270° firmware limit.
+
+**Hands off to J2 at:** Ø155 top plate — 8× M5 on Ø120 bolt circle, 2× Ø5 dowel pins.
+
+---
+
+
+
+## J2 — Shoulder (pitch)
+
+**What it does:** Lifts and lowers the arm in the vertical plane — the motion people picture when a robot "reaches up."
+
+**How it works:** A **dead axle** (Ø25×Ø19 steel tube, fixed in the shoulder fork) defines the pitch axis. A printed drum with an integral 120T pulley rotates on two 6305 bearings (25/62/17). The second hoverboard motor sits in a boxed pylon (`J2_MotorPylon`) with a 40T pulley; a 700-5M-15 belt gives 3:1 reduction to the drum.
+
+Belt tension is set with printed shims at the pylon-to-plate joint — tension loads go into the fork plate in compression, not slot friction. Motor retention uses the same D-bore + split-pinch pattern as J1 (39 mm grip, 2× M5 cross bolts).
+
+**Travel:** −60° / +125° firmware. Wider motion is blocked by belt wrap and motor envelope before the mechanical hard stops
+
+**Hands off to J3 at:** 84×40 mm boss at X 310 — 6× M5 + 2 dowels. Counterbalance anchor points exist on drum and fork (optional at 1.5 kg payload).
+
+---
