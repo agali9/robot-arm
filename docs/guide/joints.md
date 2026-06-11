@@ -62,3 +62,35 @@ Belt tension is set with printed shims at the pylon-to-plate joint — tension l
 **Hands off to J3 at:** 84×40 mm boss at X 310 — 6× M5 + 2 dowels. Counterbalance anchor points exist on drum and fork (optional at 1.5 kg payload).
 
 ---
+
+
+
+## J3 — Elbow (pitch)
+
+**What it does:** Bends the forearm relative to the upper arm — the "elbow" joint.
+
+**How it works:** 300 mm printed box beam (PETG-CF, 80×50 section) from the J2 drum to a clevis elbow. J3 reuses the J2 pattern at smaller scale: dead Ø15×Ø10 steel axle, pinch-clamped in the clevis, rotating hub on 2× 6902-2RS bearings with an integral printed 60T HTD-5M pulley.
+
+The 45–60 kg·cm servo mounts at the **arm root** (not at the elbow) and drives 15T→60T via a 625-5M-15 belt (4:1). Proximal placement keeps ~180 g of actuator mass near J2, which cuts gravity torque on the shoulder compared to hanging a servo at the elbow.
+
+**Travel:** ±115° firmware; ±150° clevis stops are crash backstops only (forearm contacts the beam earlier).
+
+**Hands off to J4 at:** Boss face X 597.2 — 4× M4 + 2× Ø4 dowels. (Face moved +15 mm from the original X 582 because the 60T teeth intruded into the bolt pattern.)
+
+---
+
+
+
+## J4 — Forearm roll
+
+**What it does:** Rotates the wrist assembly about the forearm's long axis — like twisting your forearm palm-up / palm-down while keeping the elbow angle fixed.
+
+**How it works:** Offset servo at the forearm root (keeps the center bore clear for cables). 30 kg·cm serial-bus servo drives 16T→32T on HTD-3M-15 (2:1). Roll shaft is Ø25×Ø19 aluminum tube on 2× 6805-2RS bearings in a printed housing — aluminum instead of steel to save mass at a long lever arm.
+
+Cables run through the Ø19 bore with a **torsional twist zone** (±150° rated) — same routing philosophy as the J1/J2 hollow shafts, so nothing external gets wrapped or pinched as J4 spins.
+
+**Travel:** ±150° firmware.
+
+**Hands off to wrist at:** Face X 760, Ø46 disc — 4× M4, 2 dowels, Ø14 cable pass-through. Module mass ~0.35 kg.
+
+---
