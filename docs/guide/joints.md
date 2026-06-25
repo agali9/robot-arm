@@ -94,3 +94,35 @@ Cables run through the Ø19 bore with a **torsional twist zone** (±150° rated)
 **Hands off to wrist at:** Face X 760, Ø46 disc — 4× M4, 2 dowels, Ø14 cable pass-through. Module mass ~0.35 kg.
 
 ---
+
+
+
+## J5 + J6 — Wrist (pitch + tool roll)
+
+**What they do:** J5 tilts the tool (pitch). J6 spins the tool flange (roll). Together they orient a gripper in 3D — standard offset-wrist layout similar to UR-style arms.
+
+**How it works:** Both joints are **direct-drive** serial servos — no wrist belts, which saves mass and length at the highest-leverage point on the arm.
+
+- **J5 (pitch):** 45 kg·cm servo. Output is supported on both sides: horn on the servo pod and a Ø5 stub in a 625ZZ idler bearing on the base arm, so pitch bending moments don't load the servo output bearing alone.
+- **J6 (roll):** 20 kg·cm servo. Tool flange mounts through a 6706-2RS thin-section bearing in the pitch block — side loads from the gripper go to the bearing, not the servo gearbox.
+
+Gripper cable routes to a fixed connector on the wrist block (external short loop), avoiding a through-flange slip ring.
+
+**Known offset:** Tool rotation axis sits **5.5 mm below** the J4 roll axis (Z −5.5 at the 6706). Kinematics and sim need this constant, or raise the pitch block in CAD before printing to eliminate it.
+
+**Hands off to gripper at:** Tool flange face X 837 — 4× M4 on Ø31.5 BC, Ø4 dowel, Ø10 center bore (ISO 9409-inspired pattern). Wrist module ~0.25 kg.
+
+**Travel:** J5 ±100°, J6 ±160°.
+
+---
+
+
+
+## Design themes across joints
+
+1. **Heavy joints (J1/J2):** Repurposed hoverboard BLDC + HTD timing belts for torque density on a hobby budget.
+2. **Mid joints (J3/J4):** Serial-bus servos with belt reduction — off-the-shelf actuators, printed pulleys, validated torque margins.
+3. **Wrist (J5/J6):** Direct drive where torques are low but mass sensitivity is highest.
+4. **Cable routing:** Hollow shafts and internal twist zones at every roll/pitch junction — no exposed harness wrapping around joints.
+5. **Serviceability:** Every motor, belt, and bearing is replaceable without stripping upstream modules. Longest job: J2 belt change (~10 min, axle extraction).
+

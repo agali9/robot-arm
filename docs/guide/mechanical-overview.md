@@ -60,3 +60,14 @@ These bolt patterns and faces are fixed — later modules were designed against 
 - **J4 wrist mount:** face X 760, Ø46, 4× M4 + 2 dowels, Ø14 cable pass
 - **Tool flange:** X 837, 4× M4 on Ø31.5 BC, Ø4 dowel, Ø10 center
 
+## Before you spend money
+
+1. Caliper the motor axles (Ø, flat depth, stub length) — bores are sized for Ø17 with one flat.
+2. Buy the four servos, then finalize horn/coupling details.
+3. Fix the 5.5 mm wrist offset in CAD if you want zero calibration constant.
+4. Print a small HTD tooth test coupon before the J2 drum.
+5. Run a fillet pass and check print orientations (pinch slits must cross layers).
+
+## CAD status
+
+All six joints modeled in Fusion (77 bodies, zero interference at last check). Physical assembly through J2 is underway — not a show-piece build; a few parts were printed with cosmetic or tolerance issues but used as-is where structure wasn't affected.

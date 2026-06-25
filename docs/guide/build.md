@@ -73,3 +73,45 @@ Buy servos before finalizing horn bores on printed pulleys — or wait until J3 
 ### Fasteners (~$25–40)
 
 
+| Item                                 | Qty (approx.) |
+| ------------------------------------ | ------------- |
+| M5×30 SHCS (pinch bolts)             | 4             |
+| M5 square nuts                       | 4             |
+| M5 cup-point + flat-point set screws | 4             |
+| M4×12 / M4×16 SHCS                   | ~30           |
+| M3×8 / M3×12 SHCS                    | ~40           |
+| M5 spring / Belleville washers       | 6             |
+| General M4/M5 SHCS assortment        | spare stock   |
+
+
+### Heat-set inserts (~$12–18)
+
+
+| Size | Qty (approx.) |
+| ---- | ------------- |
+| M5   | ~14           |
+| M4   | ~28           |
+| M3   | ~24           |
+
+
+Brass, standard length. Install with soldering iron at 240–250 °C before assembly.
+
+### Dowel pins (~$6–10)
+
+
+| Item     | Qty |
+| -------- | --- |
+| Ø5×16 mm | 4   |
+| Ø4×12 mm | 6   |
+
+
+### Filament (~$80–120)
+
+~5.6 L printed volume (~4.4 kg net). Buy ~6 kg including waste and test prints:
+
+
+| Material | Amount | Use                            |
+| -------- | ------ | ------------------------------ |
+| PETG-CF  | ~4 kg  | Structural parts (≥40% infill) |
+| PETG     | ~2 kg  | Lids, covers, shims            |
+
