@@ -115,3 +115,37 @@ Brass, standard length. Install with soldering iron at 240–250 °C before asse
 | PETG-CF  | ~4 kg  | Structural parts (≥40% infill) |
 | PETG     | ~2 kg  | Lids, covers, shims            |
 
+
+### Electronics (~$100–180)
+
+
+| Item                        | Notes                                                    |
+| --------------------------- | -------------------------------------------------------- |
+| 2× VESC                     | Hoverboard motor control over CAN (J1, J2)               |
+| Battery + charger           | From the hoverboard — reuse as-is                        |
+| Serial-bus servo controller | Feetech/Dynamixel-style adapter for J3–J6 *(when built)* |
+| Wiring, connectors, fuses   | Route through base grommets                              |
+| E-stop                      | Hardware kill for first power-on                         |
+
+
+### Miscellaneous (~$25–40)
+
+Loctite 638 (bearing retention) · rubber bumpers M3/M5 ×4 · cable grommets Ø10/14/18/25 · 8-pin tool connector · zip ties/clips · printed shim set (0.2/0.5/1.0 mm for J2 belt tension)
+
+### Tools (not in part cost, but required)
+
+Hex keys 2 / 2.5 / 3 / 4 mm · torque driver · calipers · reamer or scraper for bearing pockets · soldering iron (inserts) · 3D printer with ≥450×230 mm bed (or split strategy for Base_Frame)
+
+### Cost summary
+
+Rough totals if you built the full arm as currently modeled in CAD. J3–J6 line items are **planned**, not validated on hardware.
+
+
+| Category                                                   | Low       | High      |
+| ---------------------------------------------------------- | --------- | --------- |
+| Hoverboard (motors + battery + charger)                    | $80       | $150      |
+| Bearings + metal + belts                                   | $115      | $175      |
+| Servos *(planned)*                                         | $115      | $165      |
+| Fasteners, inserts, dowels, misc                           | $45       | $70       |
+| Filament                                                   | $80       | $120      |
+| **Mechanical subtotal**                                    | **~$435** | **~$680** |
