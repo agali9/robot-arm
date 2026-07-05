@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<robot name="robot_arm_6dof">
+  <link name="base_link">
+    <inertial><origin xyz="-0.132837 -0.028852 0.073304" rpy="0 0 0"/><mass value="7.886703"/>
+      <inertia ixx="0.057185" iyy="0.124621" izz="0.128088" ixy="0.004909" ixz="-0.028914" iyz="-0.006829"/></inertial>
+    <visual><origin xyz="-0.247957 0.000000 0.070000" rpy="1.5707963 0 0"/>
+      <geometry><mesh filename="meshes/base_link.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+    <collision><origin xyz="-0.126957 -0.021500 0.079000" rpy="0 0 0"/><geometry><box size="0.422000 0.225000 0.158000"/></geometry></collision>
+    <collision><origin xyz="0.000000 -0.000000 0.203000" rpy="0 0 0"/><geometry><cylinder radius="0.080000" length="0.090000"/></geometry></collision>
+  </link>
+  <link name="j1_link">
+    <inertial><origin xyz="-0.072066 0.000729 0.054131" rpy="0 0 0"/><mass value="5.404994"/>
+      <inertia ixx="0.050428" iyy="0.075184" izz="0.034119" ixy="0.000690" ixz="0.017842" iyz="-0.000144"/></inertial>
+    <visual><origin xyz="-0.247957 0.000000 -0.190000" rpy="1.5707963 0 0"/>
+      <geometry><mesh filename="meshes/j1_link.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+    <collision><origin xyz="0.000000 -0.000000 -0.095000" rpy="0 0 0"/><geometry><cylinder radius="0.077500" length="0.190000"/></geometry></collision>
+    <collision><origin xyz="-0.059207 -0.000000 0.080000" rpy="0 0 0"/><geometry><box size="0.273500 0.155000 0.160000"/></geometry></collision>
+    <collision><origin xyz="-0.133957 -0.025850 0.100000" rpy="1.5707963 0 0"/><geometry><cylinder radius="0.080000" length="0.117100"/></geometry></collision>
+    <collision><origin xyz="-0.061957 -0.060500 0.100000" rpy="0 0 0"/><geometry><box size="0.224000 0.039000 0.116000"/></geometry></collision>
+  </link>
+  <link name="j2_link">
+    <inertial><origin xyz="0.092264 -0.004378 -0.000516" rpy="0 0 0"/><mass value="1.182133"/>
+      <inertia ixx="0.002215" iyy="0.017113" izz="0.016589" ixy="-0.000949" ixz="-0.000072" iyz="0.000031"/></inertial>
+    <visual><origin xyz="-0.247957 0.000000 -0.306000" rpy="1.5707963 0 0"/>
+      <geometry><mesh filename="meshes/j2_link.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+    <collision><origin xyz="0.000000 -0.001000 0.000000" rpy="1.5707963 0 0"/><geometry><cylinder radius="0.102000" length="0.094000"/></geometry></collision>
+    <collision><origin xyz="0.199543 0.006750 0.000500" rpy="0 0 0"/><geometry><box size="0.275000 0.077500 0.085000"/></geometry></collision>
+    <collision><origin xyz="0.095643 0.012250 0.000000" rpy="0 0 0"/><geometry><box size="0.048800 0.054500 0.026000"/></geometry></collision>
+  </link>
