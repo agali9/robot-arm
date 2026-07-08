@@ -27,3 +27,78 @@
     <collision><origin xyz="0.199543 0.006750 0.000500" rpy="0 0 0"/><geometry><box size="0.275000 0.077500 0.085000"/></geometry></collision>
     <collision><origin xyz="0.095643 0.012250 0.000000" rpy="0 0 0"/><geometry><box size="0.048800 0.054500 0.026000"/></geometry></collision>
   </link>
+  <link name="j3_link">
+    <inertial><origin xyz="0.068049 -0.001349 -0.011131" rpy="0 0 0"/><mass value="0.365387"/>
+      <inertia ixx="0.000282" iyy="0.001279" izz="0.001092" ixy="-0.000036" ixz="0.000089" iyz="0.000006"/></inertial>
+    <visual><origin xyz="-0.547957 0.000000 -0.306000" rpy="1.5707963 0 0"/>
+      <geometry><mesh filename="meshes/j3_link.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+    <collision><origin xyz="0.000000 0.000250 0.000000" rpy="1.5707963 0 0"/><geometry><cylinder radius="0.049200" length="0.040500"/></geometry></collision>
+    <collision><origin xyz="0.094843 -0.000000 -0.010000" rpy="0 0 0"/><geometry><box size="0.091200 0.042000 0.090000"/></geometry></collision>
+  </link>
+  <link name="j4_link">
+    <inertial><origin xyz="0.068045 -0.011982 -0.000875" rpy="0 0 0"/><mass value="0.203505"/>
+      <inertia ixx="0.000128" iyy="0.000412" izz="0.000470" ixy="0.000082" ixz="0.000006" iyz="0.000001"/></inertial>
+    <visual><origin xyz="-0.676200 0.000000 -0.306000" rpy="1.5707963 0 0"/>
+      <geometry><mesh filename="meshes/j4_link.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+    <collision><origin xyz="0.027900 -0.000000 0.000000" rpy="0 1.5707963 0"/><geometry><cylinder radius="0.027000" length="0.111800"/></geometry></collision>
+    <collision><origin xyz="0.100800 -0.010500 0.000000" rpy="0 0 0"/><geometry><box size="0.034000 0.079000 0.052000"/></geometry></collision>
+  </link>
+  <link name="j5_link">
+    <inertial><origin xyz="0.023899 0.005416 0.002685" rpy="0 0 0"/><mass value="0.094631"/>
+      <inertia ixx="0.000015" iyy="0.000037" izz="0.000035" ixy="-0.000000" ixz="0.000000" iyz="-0.000000"/></inertial>
+    <visual><origin xyz="-0.778000 0.000000 -0.306000" rpy="1.5707963 0 0"/>
+      <geometry><mesh filename="meshes/j5_link.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+    <collision><origin xyz="0.020500 0.007450 0.000000" rpy="0 0 0"/><geometry><box size="0.063000 0.040900 0.037000"/></geometry></collision>
+  </link>
+  <link name="j6_link">
+    <inertial><origin xyz="0.003988 -0.000000 -0.000103" rpy="0 0 0"/><mass value="0.009363"/>
+      <inertia ixx="0.000002" iyy="0.000001" izz="0.000001" ixy="-0.000000" ixz="0.000000" iyz="0.000000"/></inertial>
+    <visual><origin xyz="-0.828000 -0.005500 -0.306000" rpy="1.5707963 0 0"/>
+      <geometry><mesh filename="meshes/j6_link.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+    <collision><origin xyz="0.003250 -0.000000 0.000000" rpy="0 1.5707963 0"/><geometry><cylinder radius="0.020000" length="0.011500"/></geometry></collision>
+  </link>
+  <link name="tool0"/>
+  <joint name="j1_joint" type="revolute">
+    <origin xyz="0.000000 0.000000 0.260000" rpy="0 0 0"/>
+    <parent link="base_link"/><child link="j1_link"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-4.712389" upper="4.712389" effort="30.0" velocity="3.14"/>
+    <dynamics damping="0.8" friction="0.5"/>
+  </joint>
+  <joint name="j2_joint" type="revolute">
+    <origin xyz="0.000000 0.000000 0.116000" rpy="0 0 0"/>
+    <parent link="j1_link"/><child link="j2_link"/>
+    <axis xyz="0 -1 0"/>
+    <limit lower="-1.047198" upper="2.181662" effort="45.0" velocity="2.0"/>
+    <dynamics damping="0.8" friction="0.5"/>
+  </joint>
+  <joint name="j3_joint" type="revolute">
+    <origin xyz="0.300000 0.000000 0.000000" rpy="0 0 0"/>
+    <parent link="j2_link"/><child link="j3_link"/>
+    <axis xyz="0 -1 0"/>
+    <limit lower="-2.007129" upper="2.007129" effort="20.0" velocity="1.3"/>
+    <dynamics damping="0.5" friction="0.3"/>
+  </joint>
+  <joint name="j4_joint" type="revolute">
+    <origin xyz="0.128243 0.000000 0.000000" rpy="0 0 0"/>
+    <parent link="j3_link"/><child link="j4_link"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="-2.617994" upper="2.617994" effort="5.9" velocity="2.5"/>
+    <dynamics damping="0.5" friction="0.3"/>
+  </joint>
+  <joint name="j5_joint" type="revolute">
+    <origin xyz="0.101800 0.000000 0.000000" rpy="0 0 0"/>
+    <parent link="j4_link"/><child link="j5_link"/>
+    <axis xyz="0 -1 0"/>
+    <limit lower="-1.745329" upper="1.745329" effort="4.4" velocity="5.2"/>
+    <dynamics damping="0.2" friction="0.1"/>
+  </joint>
+  <joint name="j6_joint" type="revolute">
+    <origin xyz="0.050000 0.005500 0.000000" rpy="0 0 0"/>
+    <parent link="j5_link"/><child link="j6_link"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="-2.792527" upper="2.792527" effort="2.0" velocity="5.2"/>
+    <dynamics damping="0.2" friction="0.1"/>
+  </joint>
+  <joint name="tool0_joint" type="fixed"><origin xyz="0.009000 0.000000 0.000000" rpy="0 0 0"/><parent link="j6_link"/><child link="tool0"/></joint>
+</robot>
