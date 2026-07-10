@@ -42,3 +42,33 @@ joints:
     axis: [1, 0, 0]
     lower: -2.617994
     upper: 2.617994
+    effort: 5.9
+    velocity: 2.5
+    actuator: servo
+
+  - name: j5_joint
+    link: j5_link
+    axis: [0, -1, 0]
+    lower: -1.745329
+    upper: 1.745329
+    effort: 4.4
+    velocity: 5.2
+    actuator: servo
+
+  - name: j6_joint
+    link: j6_link
+    axis: [1, 0, 0]
+    lower: -2.792527
+    upper: 2.792527
+    effort: 2.0
+    velocity: 5.2
+    actuator: servo
+
+# The tool/end-effector frame (fixed joint tool0_joint in the URDF).
+tool_frame: tool0
+
+# Named joint-space poses, listed in the joint order above (radians).
+# Used by verification and joint-test scripts as safe start/return targets.
+poses:
+  home:  [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  ready: [0.0, 0.5, -0.5, 0.0, 0.5, 0.0]

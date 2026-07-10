@@ -1,0 +1,31 @@
+# isaac.yaml — how the MCP server reaches and drives the RUNNING Isaac Sim.
+#
+# The server connects to Isaac Sim's official Python Server extension
+# (isaacsim.code_editor.python_server). It NEVER launches a SimulationApp.
+
+# --- Connection to the running instance ----------------------------------------------
+connection:
+  host: 127.0.0.1        # keep loopback; the server executes Python in your session
+  port: 8226             # default Python Server port
+  timeout_s: 30.0        # per-call socket timeout (capture calls override this)
+
+# --- Scene / robot defaults ----------------------------------------------------------
+scene:
+  # Articulation-root prim path of the robot. Leave null to auto-discover the first
+  # PhysicsArticulationRootAPI prim in the stage (recommended — no hardcoding).
+  articulation_root: null
+  # For reference only; load_scene uses whatever path you pass it.
+  usd_scene: isaac/robot_arm.usda
+
+# --- Viewport capture defaults -------------------------------------------------------
+viewport:
+  capture_width: 1280
+  capture_height: 720
+
+# --- Default inspection camera -------------------------------------------------------
+camera:
+  default_prim_path: /World/robotarm_cam
+  resolution: [1280, 720]
+  focal_length: 24.0
+  position: [1.6, 1.6, 1.2]
+  target: [0.0, 0.0, 0.4]
