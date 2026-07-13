@@ -31,3 +31,22 @@ If something is off, fix the URDF/USD export — don't patch limits only in sim.
 
 ## Joint model (sim)
 
+| Joints | Actuator type in Isaac Lab |
+| --- | --- |
+| J1, J2 | DC motors (hoverboard + belt reduction) |
+| J3–J6 | Implicit servos |
+
+Actuator tuning lives in `isaaclab/robot/actuators.py`, separate from the USD geometry.
+
+## Next steps
+
+- **Train a policy:** [isaac-lab.md](isaac-lab.md)
+- **Run an exported policy in sim:** [deployment.md](deployment.md)
+
+## Tests without the GUI
+
+```bat
+isaaclab.bat -p isaaclab/smoke_test.py
+```
+
+Builds the Isaac Lab env around this robot, resets, steps once. Good sanity check that the package wiring is correct.
