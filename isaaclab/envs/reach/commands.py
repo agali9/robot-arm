@@ -32,3 +32,22 @@ class ReachCommandsCfg:
 
     ee_pose = mdp.UniformPoseCommandCfg(
         asset_name="robot",
+        body_name=C.EE_BODY_NAME,             # j6_link (tool0 is a fixed frame)
+        resampling_time_range=(4.0, 4.0),     # resample the target every 4 s
+        debug_vis=True,                        # draw the marker (False for headless)
+        position_success_threshold=0.05,
+        goal_pose_visualizer_cfg=TARGET_MARKER_CFG,
+        ranges=mdp.UniformPoseCommandCfg.Ranges(
+            # Position sampling box (robot base frame) — the reachable workspace.
+            # (Restored to uniform random targets after the fixed-target diagnostic
+            # confirmed the action-scale root cause; now testing target-conditioned reach
+            # across the full workspace with scale=1.0.)
+            pos_x=C.WORKSPACE.x,
+            pos_y=C.WORKSPACE.y,
+            pos_z=C.WORKSPACE.z,
+            # Position-only reach: keep orientation fixed (identity).
+            roll=(0.0, 0.0),
+            pitch=(0.0, 0.0),
+            yaw=(0.0, 0.0),
+        ),
+    )

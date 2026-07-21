@@ -11,3 +11,14 @@ Targets **Isaac Lab 2.3.x** (manager-based workflow), validated against the inst
 > This package is independent of the project's MCP server / recording / live-control
 > framework. It does not modify the robot, URDF, USD, or project layout.
 
+## Layout
+
+```
+isaaclab/
+├─ robot/
+│  ├─ robot_cfg.py     # ROBOT_CFG: ArticulationCfg (geometry + physics ONLY)
+│  ├─ actuators.py     # ActuatorTuning + make_actuators (J1/J2 DC motors, J3-J6 servos)
+│  ├─ observations.py  # ObservationsCfg (joint pos/vel, EE pose, target, distance, last action)
+│  ├─ actions.py       # ActionsCfg + position/velocity/effort factories
+│  ├─ events.py        # EventCfg (startup + reset randomization)
+│  ├─ reset.py         # reset functions (target randomization)

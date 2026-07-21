@@ -16,3 +16,18 @@ USD; position `stiffness` and hoverboard `saturation_effort` / belt reductions a
 starting points to tune. Pass a customized :class:`ActuatorTuning` to
 :func:`make_actuators` to retune without touching RobotCfg.
 """
+
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+
+from isaaclab.actuators import ActuatorBaseCfg, DCMotorCfg, ImplicitActuatorCfg
+
+from utils import constants as C
+
+# Explicit-actuator convention: leave the *solver* effort limit effectively open so
+# the DC-motor model does the (single) clipping, avoiding double-clipping.
+_OPEN_SIM_EFFORT = 1.0e9
+
+
+def _damping_defaults(joints: tuple[str, ...]) -> dict[str, float]:

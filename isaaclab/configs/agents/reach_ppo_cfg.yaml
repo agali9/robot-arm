@@ -1,0 +1,44 @@
+# reach_ppo_cfg.yaml — library-agnostic MIRROR of the baseline PPO config.
+#
+# The RSL-RL trainer consumes the typed Python config
+# (configs/agents/rsl_rl_ppo_cfg.py, registered as ``rsl_rl_cfg_entry_point``), NOT
+# this file. This YAML is a human-readable, library-neutral snapshot of the same
+# hyperparameters (registered as ``agent_cfg_entry_point``) for documentation and for
+# a future non-RSL-RL runner. Keep it in sync with rsl_rl_ppo_cfg.py.
+#
+# Baseline = reference-aligned (NVIDIA Franka reach). See rsl_rl_ppo_cfg.py for the
+# justification of each deviation.
+
+seed: 42
+device: cuda:0
+
+# Rollout / update schedule.
+num_steps_per_env: 24          # rollout length per env before an update
+max_iterations: 1000           # full-run default; override small for the first run
+save_interval: 50              # checkpoint interval (iterations)
+experiment_name: reach         # -> logs/reach/<timestamp>_<run_name>/
+run_name: ""
+
+# Policy / value network (MLP) — matches the Franka reference [64, 64].
+policy:
+  class_name: ActorCritic
+  init_noise_std: 1.0
+  actor_hidden_dims: [64, 64]
+  critic_hidden_dims: [64, 64]
+  activation: elu
+
+# PPO algorithm hyperparameters. All == Franka reference except entropy_coef.
+algorithm:
+  class_name: PPO
+  value_loss_coef: 1.0
+  use_clipped_value_loss: true
+  clip_param: 0.2
+  entropy_coef: 0.001          # == Franka reference (was 0.005; see exp entropy001)
+  num_learning_epochs: 8
+  num_mini_batches: 4
+  learning_rate: 1.0e-3
+  schedule: adaptive
+  gamma: 0.99                  # == ref (gamma997 exp ruled out horizon as the bottleneck)
+  lam: 0.95
+  desired_kl: 0.01
+  max_grad_norm: 1.0
