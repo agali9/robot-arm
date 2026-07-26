@@ -99,3 +99,86 @@ def main() -> int:
     dist_sum = 0.0
     dist_count = 0
 
+    # EE->target distance is the command term's own per-env "position_error" metric
+    # (the exact quantity logged to TensorBoard). Reading it avoids re-resolving a
+    # SceneEntityCfg and matches the training-time metric precisely.
+    cmd_term = env.unwrapped.command_manager.get_term(COMMAND_NAME)
+
+    obs = wrapped_env.get_observations()
+    if isinstance(obs, tuple):
+        obs = obs[0]
+
+    step = 0
+    with torch.inference_mode():
+        while len(done_returns) < args.episodes and step < args.max_steps:
+            actions = policy(obs)
+            obs, rewards, dones, _ = wrapped_env.step(actions)
+            rewards = rewards.view(-1)
+            dones = dones.view(-1).bool()
+
+            dist = cmd_term.metrics["position_error"].view(-1)  # (N,) EE->target distance
+            dist_sum += float(dist.sum())
+            dist_count += n
+            ep_return += rewards
+            ep_len += 1.0
+            ep_min_dist = torch.minimum(ep_min_dist, dist)
+
+            if dones.any():
+                idx = dones.nonzero(as_tuple=False).view(-1)
+                for i in idx.tolist():
+                    done_returns.append(float(ep_return[i]))
+                    done_lengths.append(float(ep_len[i]))
+                    done_success.append(1.0 if float(ep_min_dist[i]) < args.threshold else 0.0)
+                    done_final_dist.append(float(dist[i]))
+                ep_return[idx] = 0.0
+                ep_len[idx] = 0.0
+                ep_min_dist[idx] = float("inf")
+            step += 1
+
+    m = len(done_returns)
+    result = {
+        "checkpoint": str(ckpt),
+        "episodes_scored": m,
+        "num_envs": n,
+        "threshold_m": args.threshold,
+        "success_rate": (sum(done_success) / m) if m else float("nan"),
+        "avg_reward": (sum(done_returns) / m) if m else float("nan"),
+        "avg_distance_m": (dist_sum / dist_count) if dist_count else float("nan"),
+        "avg_final_distance_m": (sum(done_final_dist) / m) if m else float("nan"),
+        "avg_episode_length": (sum(done_lengths) / m) if m else float("nan"),
+    }
+
+    print("\n==================== REACH EVAL REPORT ====================", flush=True)
+    print(f"  checkpoint          : {result['checkpoint']}", flush=True)
+    print(f"  episodes scored     : {result['episodes_scored']}", flush=True)
+    print(f"  success threshold   : {result['threshold_m']:.3f} m", flush=True)
+    print(f"  success rate        : {result['success_rate'] * 100:.1f} %", flush=True)
+    print(f"  avg reward          : {result['avg_reward']:.3f}", flush=True)
+    print(f"  avg distance        : {result['avg_distance_m'] * 100:.2f} cm", flush=True)
+    print(f"  avg final distance  : {result['avg_final_distance_m'] * 100:.2f} cm", flush=True)
+    print(f"  avg episode length  : {result['avg_episode_length']:.1f} steps", flush=True)
+    print("==========================================================", flush=True)
+
+    out = ckpt.parent / "eval.json"
+    with open(out, "w", encoding="utf-8") as fh:
+        json.dump(result, fh, indent=2)
+    print(f"[eval] wrote {out}", flush=True)
+
+    env.close()
+    return 0
+
+
+if __name__ == "__main__":
+    import traceback
+
+    code = 1
+    try:
+        code = main()
+    except Exception:  # print the traceback with flush so native stderr can't hide it
+        print("\n[eval] EXCEPTION:", flush=True)
+        traceback.print_exc()
+        sys.stdout.flush()
+        sys.stderr.flush()
+    finally:
+        simulation_app.close()
+    sys.exit(code)

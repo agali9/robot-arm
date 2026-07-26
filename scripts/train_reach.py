@@ -112,3 +112,53 @@ def _dump_run_metadata(log_dir: str, agent_cfg, env_cfg, num_envs: int, device: 
 def main() -> int:
     agent_cfg = load_rsl_rl_cfg(tasks.REACH_TASK_ID)
     # Command-line overrides (keep hyperparameters easy to tune / size to control).
+    if args.max_iterations is not None:
+        agent_cfg.max_iterations = args.max_iterations
+    if args.num_steps_per_env is not None:
+        agent_cfg.num_steps_per_env = args.num_steps_per_env
+    if args.save_interval is not None:
+        agent_cfg.save_interval = args.save_interval
+    if args.seed is not None:
+        agent_cfg.seed = args.seed
+    if args.run_name:
+        agent_cfg.run_name = args.run_name
+    agent_cfg.device = args.device
+
+    env = make_reach_env(tasks.REACH_TASK_ID, num_envs=args.num_envs,
+                         device=args.device, seed=agent_cfg.seed)
+
+    # One self-contained directory per run: logs/reach/<timestamp>_<run_name>/.
+    stamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    run = f"{stamp}_{agent_cfg.run_name}" if agent_cfg.run_name else stamp
+    log_dir = str(_PROJECT_DIR / "logs" / agent_cfg.experiment_name / run)
+    os.makedirs(log_dir, exist_ok=True)
+
+    runner, wrapped_env = build_runner(env, agent_cfg, log_dir=log_dir, device=args.device)
+
+    # Snapshot configs + metadata for reproducibility (after runner build so the
+    # migrated agent cfg is what gets recorded).
+    _dump_run_metadata(log_dir, agent_cfg, load_env_cfg(tasks.REACH_TASK_ID),
+                       wrapped_env.num_envs, args.device)
+
+    print(f"[train] task={tasks.REACH_TASK_ID}  num_envs={wrapped_env.num_envs}  "
+          f"device={args.device}")
+    print(f"[train] max_iterations={agent_cfg.max_iterations}  "
+          f"num_steps_per_env={agent_cfg.num_steps_per_env}  "
+          f"save_interval={agent_cfg.save_interval}")
+    print(f"[train] log_dir={log_dir}")
+
+    # Start training. (For the first proof, use a small --max_iterations.)
+    runner.learn(num_learning_iterations=agent_cfg.max_iterations, init_at_random_ep_len=True)
+
+    env.close()
+    print(f"[train] done. logs + checkpoints in: {log_dir}")
+    return 0
+
+
+if __name__ == "__main__":
+    code = 1
+    try:
+        code = main()
+    finally:
+        simulation_app.close()
+    sys.exit(code)
