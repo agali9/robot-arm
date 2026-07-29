@@ -53,3 +53,41 @@ Monitor with `tensorboard --logdir logs/reach`.
 ## Run folders
 
 Each run is self-contained under `logs/reach/<timestamp>_<name>/`:
+
+```
+model_*.pt              checkpoints
+events.out.tfevents.*   TensorBoard
+params/env.yaml         env config snapshot
+params/agent.yaml       PPO config snapshot
+params/metadata.json    seed, versions, hyperparams
+curves.csv / curves.png exported metrics
+eval.json               rollout eval results
+```
+
+Compare runs using `metadata.json`, `curves.csv`, and `eval.json`.
+
+## Smoke test
+
+```bat
+isaaclab.bat -p isaaclab/smoke_test.py
+```
+
+Builds the env, resets, steps once, checks observations are finite. No training.
+
+## Hyperparameters
+
+PPO config: `isaaclab/configs/agents/rsl_rl_ppo_cfg.py`. Based on NVIDIA's Franka reach task with annotated deviations. Change defaults there; override run size on the CLI.
+
+## Key metrics (TensorBoard)
+
+
+| What           | Tag                              |
+| -------------- | -------------------------------- |
+| Mean reward    | `Train/mean_reward`              |
+| Success rate   | `Metrics/success_rate`           |
+| Distance error | `Metrics/ee_pose/position_error` |
+| Policy loss    | `Loss/surrogate`                 |
+| Learning rate  | `Loss/learning_rate`             |
+
+
+`plot_reach_curves.py` exports these to CSV automatically.
