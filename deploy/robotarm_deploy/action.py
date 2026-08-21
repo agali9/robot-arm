@@ -29,3 +29,24 @@ class ActionProcessor:
     @property
     def last_clipped_action(self) -> np.ndarray:
         """The most recent clipped raw action (what the obs ``last_action`` term uses)."""
+        return self._last_clipped.copy()
+
+    def reset(self) -> None:
+        self._last_clipped[:] = 0.0
+
+    def process(self, raw_action: np.ndarray) -> np.ndarray:
+        """Return joint position targets (rad, JOINT_NAMES order) for ``raw_action``.
+
+        Steps mirror the frozen config: clip -> scale+offset -> clamp to joint limits.
+        Updates ``last_clipped_action`` as a side effect.
+        """
+        raw = np.asarray(raw_action, dtype=np.float32).reshape(-1)
+        if raw.shape[0] != C.ACTION_DIM:
+            raise ValueError(f"expected {C.ACTION_DIM} actions, got {raw.shape[0]}")
+
+        clipped = np.clip(raw, -C.CLIP_ACTIONS, C.CLIP_ACTIONS)
+        self._last_clipped = clipped.astype(np.float32)
+
+        target = clipped * C.ACTION_SCALE + C.HOME_POSE            # rad, absolute target
+        target = np.clip(target, C.JOINT_LOWER, C.JOINT_UPPER)     # respect URDF limits
+        return target.astype(np.float32)

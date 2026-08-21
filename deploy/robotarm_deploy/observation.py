@@ -43,3 +43,34 @@ class RobotState:
             a = np.asarray(arr).reshape(-1)
             if a.shape[0] != n:
                 raise ValueError(f"{name}: expected {n} values, got {a.shape[0]}")
+
+
+class ObservationBuilder:
+    """Assemble the flat 28-dim observation vector (numpy float32)."""
+
+    def build(self, state: RobotState, target_position: np.ndarray,
+              last_action: np.ndarray) -> np.ndarray:
+        state.validate()
+        jp = np.asarray(state.joint_pos, dtype=np.float32).reshape(-1)
+        jv = np.asarray(state.joint_vel, dtype=np.float32).reshape(-1)
+        ee = np.asarray(state.ee_position, dtype=np.float32).reshape(-1)
+        tgt = np.asarray(target_position, dtype=np.float32).reshape(-1)
+        last = np.asarray(last_action, dtype=np.float32).reshape(-1)
+        if tgt.shape[0] != 3:
+            raise ValueError(f"target_position must be length 3, got {tgt.shape[0]}")
+        if last.shape[0] != C.ACTION_DIM:
+            raise ValueError(f"last_action must be length {C.ACTION_DIM}")
+
+        rel = tgt - ee
+        dist = np.array([np.linalg.norm(rel)], dtype=np.float32)
+        obs = np.concatenate([
+            jp - C.HOME_POSE,     # joint_pos_rel
+            jv,                   # joint_vel_rel (default vel = 0)
+            ee,                   # ee_position (base frame)
+            tgt,                  # target_position (base frame)
+            rel,                  # target - ee
+            dist,                 # distance
+            last,                 # last (clipped) action
+        ]).astype(np.float32)
+        assert obs.shape[0] == C.OBS_DIM, f"assembled obs dim {obs.shape[0]} != {C.OBS_DIM}"
+        return obs

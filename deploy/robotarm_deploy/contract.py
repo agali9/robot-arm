@@ -70,3 +70,35 @@ OBS_LAYOUT: tuple[ObsField, ...] = (
     ObsField("target_relative", 3),         # target - ee (base frame)
     ObsField("distance", 1),                # ||target - ee||
     ObsField("last_action", NUM_JOINTS),    # previous CLIPPED raw action
+)
+OBS_DIM: int = sum(f.dim for f in OBS_LAYOUT)   # 28
+ACTION_DIM: int = NUM_JOINTS                     # 6
+
+
+def obs_slices() -> dict[str, slice]:
+    """Return ``{field_name: slice}`` into the flat observation vector."""
+    out, start = {}, 0
+    for f in OBS_LAYOUT:
+        out[f.name] = slice(start, start + f.dim)
+        start += f.dim
+    return out
+
+
+@dataclass(frozen=True)
+class PolicyContract:
+    """Immutable description of the policy's I/O, for validation and documentation."""
+
+    obs_dim: int = OBS_DIM
+    action_dim: int = ACTION_DIM
+    joint_names: tuple[str, ...] = JOINT_NAMES
+    action_scale: float = ACTION_SCALE
+    clip_actions: float = CLIP_ACTIONS
+    obs_normalization: bool = False   # frozen config: obs_normalization=False
+
+    def summary(self) -> str:
+        fields = "  ".join(f"{f.name}:{f.dim}" for f in OBS_LAYOUT)
+        return (f"PolicyContract(obs_dim={self.obs_dim}, action_dim={self.action_dim}, "
+                f"scale={self.action_scale}, clip={self.clip_actions})\n  obs = [{fields}]")
+
+
+CONTRACT = PolicyContract()

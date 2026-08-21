@@ -55,3 +55,42 @@ isaaclab.bat -p deploy\scripts\run_inference.py --backend sim ^
     --policy deploy\exported\policy.pt --steps 600 --target 0.40 0.20 0.30
 ```
 
+
+
+## Control loop
+
+Each cycle at 100 Hz (`control_dt=0.01`):
+
+1. Read joint state from backend
+2. Build observation
+3. Policy inference
+4. Safety layer (clip, scale, slew limit, watchdog, e-stop)
+5. Send joint targets
+
+Safety violations latch a hold on the last good command until `reset()`.
+
+## Safety layer
+
+
+| Check                           | On failure      |
+| ------------------------------- | --------------- |
+| NaN/inf in obs or action        | Hold            |
+| Joint limit violation           | Clamp or hold   |
+| Slew rate exceeded              | Limit step size |
+| Inference stall / comms timeout | Hold            |
+| E-stop                          | Latch off       |
+
+
+Unit tests in `deploy/tests/` — no Isaac required.
+
+## ROS 2 (Jazzy)
+
+`RobotInterfaceNode` bridges topics:
+
+- In: `/joint_states`
+- Out: `/joint_position_targets`
+
+Run from a sourced ROS environment (not Isaac's Python):
+
+```bash
+source /opt/ros/jazzy/setup.bash

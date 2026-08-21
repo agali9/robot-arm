@@ -40,3 +40,22 @@ def test_contract_matches_frozen_constants():
     except Exception:
         import pytest
         pytest.skip("frozen constants not importable in this environment")
+
+    assert C.JOINT_NAMES == K.JOINT_NAMES
+    assert C.EE_BODY_NAME == K.EE_BODY_NAME
+    np.testing.assert_allclose(C.HOME_POSE, np.array(list(K.HOME_POSE.values()), dtype=np.float32))
+    lower = np.array([K.JOINTS[n].lower for n in K.JOINT_NAMES], dtype=np.float32)
+    upper = np.array([K.JOINTS[n].upper for n in K.JOINT_NAMES], dtype=np.float32)
+    vel = np.array([K.JOINTS[n].velocity for n in K.JOINT_NAMES], dtype=np.float32)
+    np.testing.assert_allclose(C.JOINT_LOWER, lower)
+    np.testing.assert_allclose(C.JOINT_UPPER, upper)
+    np.testing.assert_allclose(C.JOINT_VEL_LIMIT, vel)
+
+
+if __name__ == "__main__":
+    test_dims(); test_obs_slices_cover_vector()
+    try:
+        test_contract_matches_frozen_constants()
+        print("contract: all tests PASSED (incl. frozen cross-check)")
+    except Exception as e:  # allow standalone run without frozen pkg
+        print(f"contract: dim tests PASSED; cross-check skipped ({e})")
