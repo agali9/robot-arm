@@ -125,3 +125,72 @@ class SafetyLayer:
     def check_watchdog(self, now: float | None = None) -> bool:
         now = self._clock() if now is None else now
         if (now - self._last_inference_t) > self.cfg.watchdog_timeout_s:
+            self.trip("watchdog_timeout")
+            return False
+        return True
+
+    def note_inference(self) -> None:
+        """Kick the inference watchdog (call after a successful policy step)."""
+        self._last_inference_t = self._clock()
+
+    def note_command(self) -> None:
+        """Kick the command watchdog (call after dispatching a command)."""
+        self._last_command_t = self._clock()
+
+    def sanitize_raw_action(self, raw: np.ndarray) -> np.ndarray | None:
+        """Return a finite, [-clip,clip]-bounded raw action, or None on NaN/inf."""
+        if not self._finite(raw):
+            self.trip("nan_action")
+            return None
+        return np.clip(np.asarray(raw, dtype=np.float32),
+                       -C.CLIP_ACTIONS, C.CLIP_ACTIONS)
+
+    def limit_target(self, target: np.ndarray, current_pos: np.ndarray, dt: float) -> np.ndarray:
+        """Clamp to joint limits AND slew-rate-limit toward ``target`` from ``current_pos``.
+
+        The slew step per cycle is ``vel_limit * vel_limit_scale * dt`` per joint, so an
+        aggressive position jump can never command a velocity above the joint limit.
+
+        NOTE (control tuning): because the commanded target is bounded relative to the
+        *measured* position, a downstream PD position controller only ever sees a small
+        (<= one step) position error and thus tracks BELOW the nominal joint velocity limit
+        — safe, but slow for large moves. Raise ``vel_limit_scale`` to the desired
+        closed-loop speed, or switch to ramping the commanded *reference* (bounded lead over
+        the measured position) for full-speed velocity-limited tracking.
+        """
+        target = np.clip(np.asarray(target, dtype=np.float32),
+                         self.cfg.joint_lower, self.cfg.joint_upper)
+        max_step = self.cfg.joint_vel_limit * self.cfg.vel_limit_scale * max(dt, 1e-6)
+        delta = np.clip(target - current_pos, -max_step, max_step)
+        return (current_pos + delta).astype(np.float32)
+
+    # --- main gate --------------------------------------------------------------------
+    def approve(self, raw_action: np.ndarray, current_pos: np.ndarray, dt: float,
+                state_stamp: float | None = None) -> SafetyReport:
+        """Run the full per-cycle gate and return the approved command.
+
+        If any check fails (or E-stop / HOLD is latched), returns a safe-hold command
+        (the last good target) and does not advance motion.
+        """
+        now = self._clock()
+
+        # Latched faults dominate: command a hold.
+        if self._state is SafetyState.ESTOP:
+            return SafetyReport(self._state, self._last_good_target.copy(),
+                                tuple(self._faults) or ("estop",), holding=True)
+
+        if state_stamp is not None:
+            self.check_state_fresh(state_stamp, now)
+        self.check_watchdog(now)
+
+        raw = self.sanitize_raw_action(raw_action)
+
+        if self._state is not SafetyState.OK or raw is None:
+            return SafetyReport(self._state, self._last_good_target.copy(),
+                                tuple(self._faults), holding=True)
+
+        target = raw * C.ACTION_SCALE + C.HOME_POSE   # contract scale + home offset
+        target = self.limit_target(target, current_pos, dt)
+        self._last_good_target = target.copy()
+        self.note_command()
+        return SafetyReport(SafetyState.OK, target, (), holding=False, clipped_action=raw)
