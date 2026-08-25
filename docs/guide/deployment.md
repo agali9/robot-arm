@@ -94,3 +94,35 @@ Run from a sourced ROS environment (not Isaac's Python):
 
 ```bash
 source /opt/ros/jazzy/setup.bash
+python deploy/scripts/run_inference.py --backend ros2 --policy deploy/exported/policy.pt
+```
+
+EE position is computed via FK on the backend, not read from a sensor topic.
+
+## Package layout
+
+```
+deploy/
+├── robotarm_deploy/
+│   ├── contract.py, observation.py, action.py, policy.py, safety.py
+│   ├── kinematics.py          FK providers
+│   ├── inference_app.py       main loop
+│   ├── ros2/                  topic bridge
+│   └── hardware/              motors, encoders, calibration, bringup
+├── scripts/                   export, verify, run, bringup, calibrate
+├── tests/
+└── exported/                  generated policy files
+```
+
+
+
+## Moving to hardware
+
+Only these pieces are robot-specific:
+
+1. FK from URDF (`UrdfKinematicsProvider` — implemented, validated < 0.1 mm vs sim)
+2. Motor driver node (VESC/CAN for J1/J2, serial bus for J3–J6)
+3. Safety timeouts tuned to real control rate
+4. Calibration saved to `configs/hardware_calibration.json`
+
+See [hardware.md](hardware.md) for the bring-up sequence.

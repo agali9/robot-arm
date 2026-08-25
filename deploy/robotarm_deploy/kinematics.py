@@ -154,3 +154,70 @@ class UrdfKinematicsProvider:
             raise ValueError(f"URDF chain joints {chain_joints} != contract {C.JOINT_NAMES}")
 
     @classmethod
+    def from_config(cls, urdf_path: str, base_transform_json: str, **kw):
+        """Build with the base->env transform fitted by ``verify_kinematics.py``."""
+        import json
+        d = json.loads(Path(base_transform_json).read_text())
+        return cls(urdf_path, base_position=d["base_position"],
+                   base_quat_wxyz=d["base_quat_wxyz"], **kw)
+
+    def _build_chain(self):
+        import xml.etree.ElementTree as ET
+
+        root = ET.parse(self.urdf_path).getroot()
+        joints = {}
+        child_of = {}
+        for j in root.findall("joint"):
+            name = j.get("name")
+            parent = j.find("parent").get("link")
+            child = j.find("child").get("link")
+            org = j.find("origin")
+            xyz = np.array([float(v) for v in (org.get("xyz", "0 0 0").split())]) if org is not None else np.zeros(3)
+            rpy = np.array([float(v) for v in (org.get("rpy", "0 0 0").split())]) if org is not None else np.zeros(3)
+            ax = j.find("axis")
+            axis = np.array([float(v) for v in ax.get("xyz").split()]) if ax is not None else np.array([0, 0, 1.0])
+            jtype = j.get("type")
+            joints[name] = dict(parent=parent, child=child, xyz=xyz, rpy=rpy, axis=axis, type=jtype)
+            child_of[child] = name
+
+        # Walk backwards from end_link to base_link, then reverse.
+        chain, link = [], self.end_link
+        while link != self.base_link:
+            jn = child_of.get(link)
+            if jn is None:
+                raise ValueError(f"no joint produces link '{link}' (chain broke before base)")
+            j = joints[jn]
+            chain.append((jn, j["xyz"], _rpy_to_matrix(*j["rpy"]), j["axis"], j["type"]))
+            link = j["parent"]
+        chain.reverse()
+        return chain
+
+    def _fk_matrix(self, joint_pos: np.ndarray) -> np.ndarray:
+        q = {n: float(v) for n, v in zip(C.JOINT_NAMES, np.asarray(joint_pos).reshape(-1))}
+        T = np.eye(4)
+        for name, xyz, R_org, axis, jtype in self._chain:
+            L = np.eye(4)
+            L[:3, :3] = R_org
+            L[:3, 3] = xyz
+            if jtype in ("revolute", "continuous"):
+                Rj = np.eye(4)
+                Rj[:3, :3] = _axis_angle_to_matrix(axis, q.get(name, 0.0))
+                L = L @ Rj
+            elif jtype == "prismatic":
+                Lp = np.eye(4)
+                Lp[:3, 3] = axis / (np.linalg.norm(axis) + 1e-12) * q.get(name, 0.0)
+                L = L @ Lp
+            T = T @ L
+        return T
+
+    def ee_position(self, joint_pos: np.ndarray) -> np.ndarray:
+        """EE position in the POLICY (env) frame: ``base_R @ fk_base + base_t``."""
+        p = self._fk_matrix(joint_pos)[:3, 3]
+        return (self._base_R @ p + self._base_t).astype(np.float32)
+
+    def ee_pose(self, joint_pos: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+        """Return ``(position(3), quaternion(4, w,x,y,z))`` of the end link in the policy frame."""
+        T = self._fk_matrix(joint_pos)
+        pos = self._base_R @ T[:3, 3] + self._base_t
+        R = self._base_R @ T[:3, :3]
+        return pos.astype(np.float32), _matrix_to_quat(R).astype(np.float32)
