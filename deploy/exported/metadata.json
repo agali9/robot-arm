@@ -1,0 +1,28 @@
+{
+  "checkpoint": "logs\\reach\\2026-07-19_16-33-14_scale15_random\\model_400.pt",
+  "exported": "2026-07-19T17:29:50",
+  "device": "cpu",
+  "obs_dim": 28,
+  "action_dim": 6,
+  "action_scale": 1.5,
+  "clip_actions": 1.0,
+  "obs_normalization": false,
+  "joint_names": [
+    "j1_joint",
+    "j2_joint",
+    "j3_joint",
+    "j4_joint",
+    "j5_joint",
+    "j6_joint"
+  ],
+  "formats": [
+    "torchscript:policy.pt",
+    "onnx:policy.onnx"
+  ],
+  "validation": {
+    "torchscript_max_abs_err": 0.0,
+    "onnx_max_abs_err": null,
+    "tolerance": 1e-05,
+    "passed": true
+  }
+}
