@@ -1,0 +1,54 @@
+{
+  "created": "2026-07-19T18:46:58",
+  "notes": "identity template \u2014 replace zero_offset/direction/soft limits per joint",
+  "joints": {
+    "j1_joint": {
+      "name": "j1_joint",
+      "zero_offset": 0.0,
+      "direction": 1,
+      "soft_lower": -4.71238899230957,
+      "soft_upper": 4.71238899230957,
+      "homed": false
+    },
+    "j2_joint": {
+      "name": "j2_joint",
+      "zero_offset": 0.0,
+      "direction": 1,
+      "soft_lower": -1.0471980571746826,
+      "soft_upper": 2.181662082672119,
+      "homed": false
+    },
+    "j3_joint": {
+      "name": "j3_joint",
+      "zero_offset": 0.0,
+      "direction": 1,
+      "soft_lower": -2.007128953933716,
+      "soft_upper": 2.007128953933716,
+      "homed": false
+    },
+    "j4_joint": {
+      "name": "j4_joint",
+      "zero_offset": 0.0,
+      "direction": 1,
+      "soft_lower": -2.6179940700531006,
+      "soft_upper": 2.6179940700531006,
+      "homed": false
+    },
+    "j5_joint": {
+      "name": "j5_joint",
+      "zero_offset": 0.0,
+      "direction": 1,
+      "soft_lower": -1.7453290224075317,
+      "soft_upper": 1.7453290224075317,
+      "homed": false
+    },
+    "j6_joint": {
+      "name": "j6_joint",
+      "zero_offset": 0.0,
+      "direction": 1,
+      "soft_lower": -2.792526960372925,
+      "soft_upper": 2.792526960372925,
+      "homed": false
+    }
+  }
+}
