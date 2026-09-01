@@ -91,3 +91,54 @@ class RobotCalibration:
             joints[n] = JointCalibration(name=n, zero_offset=0.0, direction=1,
                                          soft_lower=float(C.JOINT_LOWER[i]),
                                          soft_upper=float(C.JOINT_UPPER[i]), homed=False)
+        return cls(joints=joints, created=datetime.now().isoformat(timespec="seconds"),
+                   notes="identity (uncalibrated)")
+
+
+# --- Calibration tools (pure functions over sampled data) ----------------------------
+
+def zero_offset_from_home(mech_at_home: float) -> float:
+    """Zero-offset such that the current mechanism angle maps to policy 0 (home pose)."""
+    return float(mech_at_home)
+
+
+def verify_direction(mech_samples: np.ndarray, commanded_dir: np.ndarray) -> int:
+    """Infer joint direction (+1/-1) from a monotonic jog.
+
+    ``mech_samples`` are mechanism angles recorded while commanding motion in a known
+    (+) policy direction (``commanded_dir`` > 0). Returns +1 if the mechanism angle rose
+    with the commanded (+) direction, else -1.
+    """
+    dm = np.polyfit(np.arange(len(mech_samples)), mech_samples, 1)[0]  # slope
+    cd = float(np.mean(commanded_dir))
+    return 1 if (dm * cd) >= 0 else -1
+
+
+def check_encoder_sanity(mech_samples: np.ndarray, *, max_jump: float = 0.5,
+                         min_range: float = 1e-3) -> tuple[bool, str]:
+    """Sanity-check a stream of encoder angles: finite, no wild jumps, some motion range.
+
+    Returns ``(ok, message)``. ``max_jump`` = max plausible per-sample step (rad);
+    ``min_range`` guards against a dead/stuck encoder during a jog.
+    """
+    s = np.asarray(mech_samples, dtype=np.float64)
+    if not np.all(np.isfinite(s)):
+        return False, "non-finite encoder samples"
+    if s.size >= 2:
+        if float(np.abs(np.diff(s)).max()) > max_jump:
+            return False, f"encoder jump > {max_jump} rad (wiring/parity glitch?)"
+        if float(s.max() - s.min()) < min_range:
+            return False, "encoder did not move during jog (stuck/disconnected?)"
+    return True, "ok"
+
+
+def verify_soft_within_hard(cal: JointCalibration, hard_lower: float,
+                            hard_upper: float, margin: float = 0.0) -> tuple[bool, str]:
+    """Ensure a joint's soft limits sit inside the URDF hard limits (with optional margin)."""
+    if cal.soft_lower < hard_lower + margin:
+        return False, f"{cal.name}: soft_lower {cal.soft_lower} < hard {hard_lower}"
+    if cal.soft_upper > hard_upper - margin:
+        return False, f"{cal.name}: soft_upper {cal.soft_upper} > hard {hard_upper}"
+    if cal.soft_lower >= cal.soft_upper:
+        return False, f"{cal.name}: soft_lower >= soft_upper"
+    return True, "ok"

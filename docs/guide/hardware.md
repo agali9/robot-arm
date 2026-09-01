@@ -75,3 +75,57 @@ Run `deploy/scripts/bringup.py`. Each gate blocks the next.
 
 | Step | State             | What happens                              |
 | ---- | ----------------- | ----------------------------------------- |
+| 0    | OFF               | Powered down                              |
+| 1    | POWERED_ON        | Logic on, backend connects                |
+| 2    | MOTORS_INIT       | All 6 motors respond                      |
+| 3    | ENCODERS_VERIFIED | Reads finite and plausible                |
+| 4    | HOMED             | Zero established                          |
+| 5    | CALIBRATED        | JSON loaded and applied                   |
+| 6    | SAFETY_VERIFIED   | Monitor preflight green                   |
+| 7    | JOG_READY         | Manual jog each joint                     |
+| 8    | DRY_RUN           | Policy runs, commands logged only         |
+| 9    | LIVE              | `enable_live(confirm=True)` — motors move |
+
+
+```bat
+:: Safe rehearsal (no motor output)
+isaaclab.bat -p deploy\scripts\bringup.py --policy deploy\exported\policy.pt ^
+    --dry-run-steps 200 --log deploy\logs\dryrun_cmds.jsonl
+```
+
+
+
+## First real move
+
+Keep a hand on the E-stop. All six conditions must be true before live output:
+
+1. Calibration loaded, all homed
+2. Encoders sane
+3. Soft limits valid
+4. Hardware safety green
+5. Dead-man + policy enable both on
+6. `enable_live(confirm=True)` called explicitly
+
+**First move tips:**
+
+- Pick a near, central target — small motion
+- Start with low `vel_limit_scale` (slew limiter bounds speed)
+- Watch for `joint_disagreement`, over-current, over-temp trips
+
+
+| Step | Action                                          |
+| ---- | ----------------------------------------------- |
+| 0    | Power off, area clear                           |
+| 1    | Logic power, then motor bus                     |
+| 2    | Dry-run 200 steps, check logged commands        |
+| 3–6  | Encoders, homing, calibration, safety preflight |
+| 7    | Motor enable                                    |
+| 8    | Manual jog each joint ±small                    |
+| 9    | Policy dry-run (no transmit)                    |
+| 10   | Arm both enable switches                        |
+| 11   | First live move at low slew                     |
+| 12   | Ramp slew gradually                             |
+
+
+Abort: E-stop → diagnose → fix → re-home → restart from step 0.
+

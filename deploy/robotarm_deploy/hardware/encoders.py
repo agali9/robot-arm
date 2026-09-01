@@ -131,3 +131,93 @@ class VescCanEncoder(EncoderDriver):
 
     VESCs broadcast status frames; this caches the latest reported motor position for
     ``vesc_id`` and maps it back to the joint (divide by belt reduction). Position over CAN
+    is firmware-dependent (enable a status frame carrying position, e.g. STATUS_5 tacho or a
+    custom app); ``_extract_position_deg`` is the single hook to match your VESC config.
+    """
+
+    def __init__(self, name: str, can_bus, vesc_id: int, belt_ratio: float = 1.0) -> None:
+        super().__init__(name)
+        self.can_bus = can_bus
+        self.vesc_id = vesc_id
+        self.belt_ratio = belt_ratio
+        self._last_motor_deg: float | None = None
+
+    def is_alive(self) -> bool:
+        return self.can_bus.is_open
+
+    def _extract_position_deg(self, msg) -> float | None:
+        """Return motor position (deg) if ``msg`` is a position status frame for our VESC.
+
+        Placeholder matching the common convention (int32 big-endian deg*1e6 in the frame).
+        Adjust the packet id + byte layout to your VESC firmware's status configuration.
+        """
+        import struct
+        if (msg.arbitration_id & 0xFF) != (self.vesc_id & 0xFF):
+            return None
+        if len(msg.data) < 4:
+            return None
+        return struct.unpack(">i", bytes(msg.data[:4]))[0] / 1e6
+
+    def read_raw(self) -> float:
+        # Drain pending frames; keep the latest position for our VESC.
+        for _ in range(16):
+            msg = self.can_bus.recv(timeout=0.001)
+            if msg is None:
+                break
+            deg = self._extract_position_deg(msg)
+            if deg is not None:
+                self._last_motor_deg = deg
+        if self._last_motor_deg is None:
+            raise RuntimeError(f"VescCanEncoder[{self.name}]: no position status yet")
+        return (self._last_motor_deg * np.pi / 180.0) / self.belt_ratio
+
+
+class SimulatedEncoder(EncoderDriver):
+    """Follows a commanded mechanism angle (for dry-run / tests). Always homed."""
+
+    def __init__(self, name: str, initial: float = 0.0) -> None:
+        super().__init__(name)
+        self._mech = float(initial)
+
+    def set_mech(self, mech: float) -> None:
+        self._mech = float(mech)
+
+    def read_raw(self) -> float:
+        return self._mech
+
+
+class EncoderBank:
+    """All joint encoders + calibration -> normalized joint positions/velocities.
+
+    This is the ONLY object that produces the policy's ``joint_pos``/``joint_vel``. It
+    holds the calibration so upstream code deals purely in policy-frame radians.
+    """
+
+    def __init__(self, encoders: dict[str, EncoderDriver], calibration,
+                 vel_filter_alpha: float = 0.4, clock=time.monotonic) -> None:
+        self._enc = encoders
+        self._cal = calibration
+        self._alpha = float(vel_filter_alpha)
+        self._clock = clock
+        self._last_pos: np.ndarray | None = None
+        self._last_t: float | None = None
+        self._vel = np.zeros(C.NUM_JOINTS, dtype=np.float32)
+
+    def alive(self) -> dict[str, bool]:
+        return {n: self._enc[n].is_alive() for n in C.JOINT_NAMES}
+
+    def read_joint_positions(self) -> np.ndarray:
+        """Return calibrated joint positions (rad, JOINT_NAMES order)."""
+        mech = np.array([self._enc[n].read_raw() for n in C.JOINT_NAMES], dtype=np.float32)
+        return self._cal.to_joint_vec(mech)
+
+    def read(self) -> tuple[np.ndarray, np.ndarray, float]:
+        """Return ``(joint_pos, joint_vel, stamp)``; velocity is filtered finite-diff."""
+        now = self._clock()
+        pos = self.read_joint_positions()
+        if self._last_pos is not None and self._last_t is not None:
+            dt = max(now - self._last_t, 1e-4)
+            raw_vel = (pos - self._last_pos) / dt
+            self._vel = self._alpha * raw_vel + (1.0 - self._alpha) * self._vel
+        self._last_pos, self._last_t = pos, now
+        return pos.astype(np.float32), self._vel.astype(np.float32), now

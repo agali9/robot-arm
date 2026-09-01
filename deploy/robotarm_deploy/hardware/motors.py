@@ -194,3 +194,87 @@ class SerialBusServoDriver(MotorDriver):
         pkt = feetech_write_pos_packet(self.servo_id, self.rad_to_ticks(mech_target_rad))
         self.serial_bus.write(pkt)
 
+    def read_feedback(self) -> MotorFeedback:
+        return MotorFeedback()            # current/temp via extra register reads (optional)
+
+    def is_alive(self) -> bool:
+        return self.serial_bus.is_open
+
+
+class SimulatedMotor(MotorDriver):
+    """Records the last commanded mechanism target (dry-run / tests). Never touches hardware.
+
+    Optionally mirrors the command into a :class:`SimulatedEncoder` to close the loop.
+    """
+
+    def __init__(self, name: str, encoder=None) -> None:
+        super().__init__(name)
+        self.last_target: float = 0.0
+        self._encoder = encoder
+
+    def _enable(self) -> None: ...
+    def _disable(self) -> None: ...
+
+    def _send_position(self, mech_target_rad: float) -> None:
+        self.last_target = mech_target_rad
+        if self._encoder is not None:
+            self._encoder.set_mech(mech_target_rad)   # perfect follower (ideal actuator)
+
+
+class MotorBank:
+    """All joint motors behind one object, with enable gating and dry-run interception."""
+
+    def __init__(self, motors: dict[str, MotorDriver], dry_run: bool = False,
+                 dry_run_log: str | Path | None = None, clock=time.monotonic) -> None:
+        self._motors = motors
+        self.dry_run = dry_run
+        self._clock = clock
+        self._log_path = Path(dry_run_log) if dry_run_log else None
+        self._log_fh = None
+
+    # --- lifecycle --------------------------------------------------------------------
+    def enable_all(self) -> None:
+        for m in self._motors.values():
+            m.enable()
+
+    def disable_all(self) -> None:
+        for m in self._motors.values():
+            try:
+                m.disable()
+            except Exception:
+                pass
+
+    @property
+    def all_enabled(self) -> bool:
+        return all(m.enabled for m in self._motors.values())
+
+    def alive(self) -> dict[str, bool]:
+        return {n: self._motors[n].is_alive() for n in C.JOINT_NAMES}
+
+    def feedback(self) -> dict[str, MotorFeedback]:
+        return {n: self._motors[n].read_feedback() for n in C.JOINT_NAMES}
+
+    # --- command ----------------------------------------------------------------------
+    def send_mech_targets(self, mech: np.ndarray) -> None:
+        """Command mechanism targets (rad, JOINT_NAMES order). Dry-run logs instead."""
+        mech = np.asarray(mech, dtype=np.float32).reshape(-1)
+        if self.dry_run:
+            self._log(mech)
+            return
+        for n, t in zip(C.JOINT_NAMES, mech):
+            self._motors[n].send_position(float(t))
+
+    def _log(self, mech: np.ndarray) -> None:
+        rec = {"t": self._clock(),
+               "mech_targets": {n: float(v) for n, v in zip(C.JOINT_NAMES, mech)}}
+        if self._log_path is not None:
+            if self._log_fh is None:
+                self._log_path.parent.mkdir(parents=True, exist_ok=True)
+                self._log_fh = open(self._log_path, "a", encoding="utf-8")
+            self._log_fh.write(json.dumps(rec) + "\n")
+            self._log_fh.flush()
+
+    def close(self) -> None:
+        if self._log_fh is not None:
+            self._log_fh.close()
+            self._log_fh = None
