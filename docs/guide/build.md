@@ -149,3 +149,20 @@ Rough totals if you built the full arm as currently modeled in CAD. J3–J6 line
 | Fasteners, inserts, dowels, misc                           | $45       | $70       |
 | Filament                                                   | $80       | $120      |
 | **Mechanical subtotal**                                    | **~$435** | **~$680** |
+| Electronics (VESC, wiring, E-stop; battery included above) | $100      | $180      |
+| **Full prototype estimate**                                | **~$535** | **~$860** |
+
+
+Biggest line items: hoverboard, servos, and filament. Only J1/J2 costs are proven on a real build so far.
+
+## Printing
+
+- **Material:** PETG-CF, ≥40% infill, 3+ perimeters on structural parts. Plain PETG is fine for lids, covers, and all pulleys.
+- **Pulleys:** every timing pulley is printed (40T, 80T, 120T, 60T, 15T, 32T, 16T). Print teeth vertically for best belt mesh. Run a tooth coupon before the full J2 drum.
+- **Bearing pockets:** print −0.15 mm, Loctite 638 on outer races.
+- **Heat-set inserts:** 240–250 °C, check square afterward.
+- **Print order:** base → shoulder → upper arm → forearm → wrist. J3+ parts are CAD-only until those modules are finalized.
+- **Largest part:** Base_Frame (~3 L, ~30 h). Confirm bed fit (450×230 mm may need diagonal placement).
+
+
+| Part                     | Notes                                         |

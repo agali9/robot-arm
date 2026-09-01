@@ -129,3 +129,27 @@ Keep a hand on the E-stop. All six conditions must be true before live output:
 
 Abort: E-stop → diagnose → fix → re-home → restart from step 0.
 
+## Before first power-on
+
+Fill in `HardwareConfig`:
+
+- CAN channel, serial port
+- VESC IDs and belt ratios (J1, J2)
+- Servo IDs and tick scaling (J3–J6)
+
+Confirm servo register map matches your hardware (driver assumes Feetech STS3215-class). Verify VESC position feedback frame layout.
+
+FK is done: `UrdfKinematicsProvider` validated against sim with base transform in `configs/base_transform.json`.
+
+## Failure recovery
+
+
+| Symptom                   | Likely cause                         |
+| ------------------------- | ------------------------------------ |
+| `encoder_timeout`         | Wiring, sensor power                 |
+| `joint_disagreement`      | Stall, slipped belt, wrong direction |
+| `soft_limit_exceeded`     | Bad calibration                      |
+| Wrong commands in dry-run | Fix calibration/FK — do not go live  |
+
+
+Pattern: E-stop → power safe → fix root cause → re-home → re-run bring-up from the top.
