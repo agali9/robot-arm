@@ -1,0 +1,19 @@
+{
+  "base_position": [
+    3.9455417758405e-05,
+    3.724425554114952e-05,
+    5.955020069359218e-05
+  ],
+  "base_quat_wxyz": [
+    -3.9766836750580674e-05,
+    0.9999999958171564,
+    -5.8121246094325726e-05,
+    -5.834558027659839e-05
+  ],
+  "rotation_max_dev_from_identity": 2.0000000018179476,
+  "residual_mm": {
+    "max": 0.09891738717259202,
+    "mean": 0.05776136356845229
+  },
+  "note": "base_link pose in the policy (env) frame; add to URDF FK to match training."
+}
